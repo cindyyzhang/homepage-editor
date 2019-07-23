@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <!-- The first thing in any HTML file should be the charset -->
+  <meta charset="utf-8">
+
+  <!-- Make the page mobile compatible -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Allow installing the app to the homescreen -->
+  <meta name="mobile-web-app-capable" content="yes">
+
+  <link href="https://unpkg.com/filepond/dist/filepond.css" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
+  <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
+  
+  <style>
+    html {
+      font-size: 100%;
+      overflow-y: scroll;
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+    }
+
+    body {
+      color: #444;
+      font-family: -apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+      line-height: 1.7;
+      padding: 1em;
+      margin: auto;
+      max-width: 50em;
+      background: #fefefe;
+    }
+    input[type=submit] {
+      -moz-box-shadow:inset 0px 39px 0px -24px #ff476c;
+      -webkit-box-shadow:inset 0px 39px 0px -24px #ff476c;
+      box-shadow:inset 0px 39px 0px -24px #ff476c;
+      background-color:#ff476c;
+      -moz-border-radius:4px;
+      -webkit-border-radius:4px;
+      border-radius:3px;
+      border:none;
+      display:inline-block;
+      cursor:pointer;
+      color:#ffffff;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size:16px;
+      padding:9px 25px;
+      text-decoration:none;
+    }
+
+    /* The grid: Four equal columns that floats next to each other */
+    .column {
+      float: left;
+      width: 10%;
+      padding: 10px;
+    }
+
+    /* Style the images inside the grid */
+    .column img {
+      opacity: 0.8; 
+      cursor: pointer; 
+    }
+
+    .column img:hover {
+      opacity: 1;
+    }
+
+    /* Clear floats after the columns */
+    .row:after {
+      content: "";
+      display: table;
+      clear: both;
+    }
+
+    /* The expanding image container (positioning is needed to position the close button and the text) */
+    .container {
+      position: relative;
+      display: none;
+    }
+
+    /* Expanding image text */
+    #imgtext {
+      position: absolute;
+      bottom: 15px;
+      left: 50px;
+      color: white;
+      font-size: 20px;
+    }
+
+    .center {
+      display: block;
+      margin-top: 15px;
+      margin-bottom: 15px;
+      margin-left: auto;
+      margin-right: auto;
+      width: 90%;
+    }
+
+    /* Closable button inside the image */
+    .closebtn {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      color: white;
+      font-size: 35px;
+      cursor: pointer;
+    }
+
+    img.thumbnail { 
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Display a message if JS has been disabled on the browser. -->
+  <noscript>If you're seeing this message, that means
+    <strong>JavaScript has been disabled on your browser</strong>, please
+    <strong>enable JS</strong> to make this app work.</noscript>
+
+  <!-- The app hooks into this div -->
+  <div id="app"></div>
+  <h1> Group Homepage Editor</h1>
+    <script>
+      var myValue;
+      function submit() {
+        myValue = simplemde.value();
+        console.log(myValue);
+      }
+    </script>
+  <form action="javascript:submit()">
+    <textarea id="first"></textarea>
+    <input type="submit" value="Save">
+  </form>
+  <script>
+    var simplemde = new SimpleMDE({
+      element: document.getElementById("first"),
+      spellChecker: false,
+      autofocus: true,
+      tabSize: 4,
+      initialValue: " # Welcome \n Enter your group description here. Be sure to check out **bold** and *italic* styling, or even [links](https://google.com). You can type the Markdown syntax, use the toolbar, or use shortcuts like `cmd-b` or `ctrl-b`.",
+    });
+  </script>
+  <br><br><br>
+
+  <!-- We'll transform this input into a pond -->
+  <input type="file" class="filepond">
+
+  <!-- Load FilePond library -->
+  <script src="https://unpkg.com/filepond/dist/filepond.js"></script>
+
+  <!-- Turn all file input elements into ponds -->
+  <script>
+    FilePond.parse(document.body);
+  </script>
+
+  <script>
+    function myFunction(imgs) {
+    // Get the expanded image
+    var expandImg = document.getElementById("expandedImg");
+    // Get the image text
+    var imgText = document.getElementById("imgtext");
+    // Use the same src in the expanded image as the image being clicked on from the grid
+    expandImg.src = imgs.src;
+    // Use the value of the alt attribute of the clickable image as text inside the expanded image
+    imgText.innerHTML = imgs.alt;
+    // Show the container element (hidden with CSS)
+    expandImg.parentElement.style.display = "block";
+  }
+  </script>
+
+  <br>
+  <div class="row">
+    <div class="column">
+      <img src="img_nature.jpg" alt="Nature" class="thumbnail" onclick="myFunction(this);">
+    </div>
+    <div class="column">
+      <img src="img_snow.jpg" alt="Snow" class="thumbnail" onclick="myFunction(this);">
+    </div>
+    <div class="column">
+      <img src="img_mountains.jpg" alt="Mountains" class="thumbnail" onclick="myFunction(this);">
+    </div>
+    <div class="column">
+      <img src="img_lights.jpg" alt="Lights" class="thumbnail" onclick="myFunction(this);">
+    </div>
+  </div>
+
+  <!-- The expanding image container -->
+  <div class="container">
+    <!-- Close the image -->
+    <span onclick="this.parentElement.style.display='none'" class="closebtn">&times;</span>
+
+    <!-- Expanded image -->
+    <img id="expandedImg" class="center">
+
+    <!-- Image text -->
+    <div id="imgtext"></div>
+  </div>
+
+
+</body>
+
+</html>
