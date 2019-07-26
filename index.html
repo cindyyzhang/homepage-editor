@@ -13,8 +13,9 @@
 
   <link href="https://unpkg.com/filepond/dist/filepond.css" rel="stylesheet">
 
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
-  <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="trix.css">
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script type="text/javascript" src="trix.js"></script>
   
   <style>
     html {
@@ -123,29 +124,205 @@
     <strong>JavaScript has been disabled on your browser</strong>, please
     <strong>enable JS</strong> to make this app work.</noscript>
 
+  <script>
+
+  (function ($, window, document, undefined) {
+
+  var wysiwyg = {
+    serverPath: "/attachments",
+    fileMaxSize: 2097152, // 2MB
+
+    config: function () {
+      _trixAddAttachmentButtonToToolbar();
+
+      document.addEventListener("trix-attachment-add", _trixAttachmentAdd);
+      document.addEventListener("trix-attachment-remove", _trixAttachmentRemove);
+    },
+
+    addFile: function () {
+      var trix = document.querySelector("trix-editor");
+      var fileInput = document.createElement("input");
+
+      fileInput.setAttribute("type", "file");
+      fileInput.setAttribute("multiple", "");
+
+      fileInput.addEventListener("change", function(event) {
+        var files = this.files;
+        var results = [];
+        var filesCounter = files.length;
+
+        for (var i = 0; i < filesCounter; i++) {
+          results.push(trix.editor.insertFile(files[i]));
+        }
+
+        return results;
+      }),
+
+      fileInput.click();
+    }
+  };
+
+  window.wysiwyg = wysiwyg;
+ 
+  function _trixAddAttachmentButtonToToolbar() {
+    var buttonHTML = '<button type="button" onclick="return window.wysiwyg.addFile();" class="trix-button trix-button--icon trix-button--icon-attach-files" data-trix-action="x-attach" title="Attach Files" tabindex="-1">Attach Files</button>';
+    var nth = 0;
+
+    var newtoolbarHTML = Trix.config.toolbar.getDefaultHTML().replace(/<\/span>/g, function (match, i) {
+      return (++nth === 2) ? buttonHTML + '</span>' : match;
+    });
+
+    Trix.config.toolbar.getDefaultHTML = function () {
+      return newtoolbarHTML;
+    };
+  }
+
+  function _trixAttachmentAdd(event) {
+    var attachment = event.attachment;
+    var xhr = new XMLHttpRequest;
+    var form = new FormData;
+    var file = attachment.file;
+    var CSRFToken = $('meta[name="csrf-token"]').attr('content');
+
+    if (!file || file.size === 0) {
+      attachment.remove();
+
+      return alert("The file you submitted looks empty.");;
+    }
+
+    if (file.size > wysiwyg.fileMaxSize) {
+      attachment.remove();
+
+      return alert("The selected file is bigger then the allowed max file size.");
+    }
+
+    form.append("attachment[file]", file);
+
+    xhr.open("POST", wysiwyg.serverPath, true);
+    xhr.setRequestHeader('X-CSRF-Token', CSRFToken);
+
+    xhr.upload.onprogress = function(event) {
+      var progress = event.loaded / event.total * 100;
+
+      return attachment.setUploadProgress(progress);
+    };
+
+    xhr.onload = function() {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        var data = JSON.parse(xhr.responseText);
+
+        data.href = data.url;
+
+        return attachment.setAttributes(data);
+      } else {
+        attachment.remove();
+
+        alert("Upload failed. Try to reload the page.");
+      }
+    };
+
+    return xhr.send(form);
+  };
+
+  function _trixAttachmentRemove(event) {
+    var attachment = event.attachment;
+    var data = attachment.getAttributes();
+
+    if (!data.id) { return false; }
+
+    $.ajax({ url: wysiwyg.serverPath + "/" + data.id, type: "delete" });
+  }
+
+  })(jQuery, window, document);
+
+  window.wysiwyg.config();
+
+    (function() {
+      var HOST = "https://d13txem1unpe48.cloudfront.net/"
+
+      addEventListener("trix-attachment-add", function(event) {
+        Trix.config.attachments.preview.caption = { name: false, size: false }
+        if (event.attachment.file) {
+          uploadFileAttachment(event.attachment);
+        }
+      });
+
+      function uploadFileAttachment(attachment) {
+        uploadFile(attachment.file, setProgress, setAttributes)
+
+        function setProgress(progress) {
+          attachment.setUploadProgress(progress)
+        }
+
+        function setAttributes(attributes) {
+          attachment.setAttributes(attributes)
+        }
+      }
+
+      function uploadFile(file, progressCallback, successCallback) {
+        var key = createStorageKey(file)
+        var formData = createFormData(key, file)
+        var xhr = new XMLHttpRequest()
+
+        xhr.open("POST", HOST, true)
+
+        xhr.upload.addEventListener("progress", function(event) {
+          var progress = event.loaded / event.total * 100
+          progressCallback(progress)
+        })
+
+        xhr.addEventListener("load", function(event) {
+          if (xhr.status == 204) {
+            var attributes = {
+              url: HOST + key,
+              href: HOST + key + "?content-disposition=attachment"
+            }
+            successCallback(attributes)
+          }
+        })
+
+        xhr.send(formData)
+      }
+
+      function createStorageKey(file) {
+        var date = new Date()
+        var day = date.toISOString().slice(0,10)
+        var name = date.getTime() + "-" + file.name
+        return [ "tmp", day, name ].join("/")
+      }
+
+      function createFormData(key, file) {
+        var data = new FormData()
+        data.append("key", key)
+        data.append("file", file)
+        data.append("Content-Type", file.type)
+        return data
+      }
+    })();
+  </script>
+
   <!-- The app hooks into this div -->
   <div id="app"></div>
   <h1> Group Homepage Editor</h1>
-    <script>
-      var myValue;
-      function submit() {
-        myValue = simplemde.value();
-        console.log(myValue);
-      }
-    </script>
-  <form action="javascript:submit()">
-    <textarea id="first"></textarea>
-    <input type="submit" value="Save">
+
+  <form>
+    <input id="x" value="<h1>Welcome</h1><div>Enter your group description here! Try playing around with the <strong>bold </strong>and <em>italic</em> styling, or create bulleted lists like the one below.</div><ul><li>First note</li><li>Second note</li></ul><div>There are numbered lists as well.</div><ol><li>first item</li><li>second item</li></ol><div>You can also drag and drop images from your computer into the text editor (try it out!)</div>" type="hidden" name="content">
+    <trix-editor input="x"></trix-editor>
   </form>
+
   <script>
-    var simplemde = new SimpleMDE({
-      element: document.getElementById("first"),
-      spellChecker: false,
-      autofocus: true,
-      tabSize: 4,
-      initialValue: " # Welcome \n Enter your group description here! Be sure to check out **bold** and *italic* styling, or even [links](https://google.com). You can type the Markdown syntax, use the toolbar, or use shortcuts like `cmd-b` or `ctrl-b`. \n\n## Lists  \nUnordered lists can be started using the toolbar or by typing `* `, `- `, or `+ `. Ordered lists can be started by typing `1. ` \n\n### Unordered \n* Lists are a piece of cake \n* They even auto continue as you type \n* A double enter will end them \n* Tabs and shift-tabs work too \n\n### Ordered Lists \n1. Numbered lists . . . \n2. work too! \n \nYou can **preview** your text by clicking the eye in the toolbar. To get a split-screen editor, click the split-screen icon to the right of the eye.",
-    });
+    var myValue;
+    function submit() {
+      myValue = document.getElementById("x").value;
+      console.log(myValue);
+    }
   </script>
+
+  <br>
+
+  <form action="javascript:submit()">
+    <input type="submit" value="Save">
+  </form> 
   <br><br><br>
 
   <!-- We'll transform this input into a pond -->
