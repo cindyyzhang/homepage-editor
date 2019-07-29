@@ -1,2 +1,3 @@
 # homepage-editor
-Homepage editor prototype for Divvly 
+
+Homepage editor prototype for Divvly using Trix.
