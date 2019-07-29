@@ -10,6 +10,10 @@ trix-editor {
   padding: 0.4em 0.6em;
   min-height: 30em;
   outline: none; }
+a {
+  color: #808080;
+  text-decoration: inherit;
+}
 trix-toolbar * {
   box-sizing: border-box; }
 trix-toolbar .trix-button-row {
