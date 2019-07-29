@@ -124,6 +124,7 @@
     <strong>JavaScript has been disabled on your browser</strong>, please
     <strong>enable JS</strong> to make this app work.</noscript>
 
+  <!-- Add upload image button -->
   <script>
 
   (function ($, window, document, undefined) {
@@ -165,7 +166,7 @@
   window.wysiwyg = wysiwyg;
  
   function _trixAddAttachmentButtonToToolbar() {
-    var buttonHTML = '<button type="button" onclick="return window.wysiwyg.addFile();" class="trix-button trix-button--icon trix-button--icon-attach-files" data-trix-action="x-attach" title="Attach Files" tabindex="-1">Attach Files</button>';
+    var buttonHTML = '<button type="button" onclick="return window.wysiwyg.addFile();" class="trix-button trix-button--icon trix-button--icon-attach-files" data-trix-action="x-attach" title="Upload Image" tabindex="-1">Upload Image</button>';
     var nth = 0;
 
     var newtoolbarHTML = Trix.config.toolbar.getDefaultHTML().replace(/<\/span>/g, function (match, i) {
@@ -306,7 +307,7 @@
   <h1> Group Homepage Editor</h1>
 
   <form>
-    <input id="x" value="<h1>Welcome</h1><div>Enter your group description here! Try playing around with the <strong>bold </strong>and <em>italic</em> styling, or create bulleted lists like the one below.</div><ul><li>First note</li><li>Second note</li></ul><div>There are numbered lists as well.</div><ol><li>first item</li><li>second item</li></ol><div>You can also drag and drop images from your computer into the text editor (try it out!)</div>" type="hidden" name="content">
+    <input id="x" value="<h1>Welcome</h1><div>Enter your group description here! Try playing around with the <strong>bold </strong>and <em>italic</em> styling, or create bulleted lists like the one below.</div><ul><li>First note</li><li>Second note</li></ul><div>There are numbered lists as well.</div><ol><li>first item</li><li>second item</li></ol><div>You can also drag and drop images from your computer into the text editor or use the upload image button in the toolbar (try it out below!)</div>" type="hidden" name="content">
     <trix-editor input="x"></trix-editor>
   </form>
 

@@ -301,6 +301,9 @@ trix-editor .attachment__metadata {
     margin-left: 0.2em;
     white-space: nowrap; }
 @charset "UTF-8";
+.trix-button--icon-attach-files::before {
+  background-image: url('upload_image.png');
+}
 .trix-content {
   line-height: 1.5; }
   .trix-content * {
