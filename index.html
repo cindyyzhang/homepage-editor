@@ -208,20 +208,6 @@
       return attachment.setUploadProgress(progress);
     };
 
-    xhr.onload = function() {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        var data = JSON.parse(xhr.responseText);
-
-        data.href = data.url;
-
-        return attachment.setAttributes(data);
-      } else {
-        attachment.remove();
-
-        alert("Upload failed. Try to reload the page.");
-      }
-    };
-
     return xhr.send(form);
   };
 
